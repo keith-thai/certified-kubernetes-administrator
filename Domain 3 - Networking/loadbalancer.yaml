@@ -8,4 +8,4 @@ spec:
   - port: 80
     protocol: TCP
   selector:
-    run: nginx
+    run: nginx00

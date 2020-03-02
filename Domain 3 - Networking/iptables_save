@@ -1,0 +1,66 @@
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+KUBE-SERVICES  all  --  anywhere             anywhere             ctstate NEW /* kubernetes service portals */
+KUBE-EXTERNAL-SERVICES  all  --  anywhere             anywhere             ctstate NEW /* kubernetes externally-visible service portals */
+KUBE-FIREWALL  all  --  anywhere             anywhere            
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination         
+DOCKER-ISOLATION-STAGE-1  all  --  anywhere             anywhere            
+DOCKER-USER  all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED,ESTABLISHED
+DOCKER     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+KUBE-FORWARD  all  --  anywhere             anywhere             /* kubernetes forwarding rules */
+KUBE-SERVICES  all  --  anywhere             anywhere             ctstate NEW /* kubernetes service portals */
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination         
+KUBE-SERVICES  all  --  anywhere             anywhere             ctstate NEW /* kubernetes service portals */
+KUBE-FIREWALL  all  --  anywhere             anywhere            
+
+Chain DOCKER (1 references)
+target     prot opt source               destination         
+
+Chain DOCKER-ISOLATION-STAGE-1 (1 references)
+target     prot opt source               destination         
+DOCKER-ISOLATION-STAGE-2  all  --  anywhere             anywhere            
+RETURN     all  --  anywhere             anywhere            
+
+Chain DOCKER-USER (1 references)
+target     prot opt source               destination         
+RETURN     all  --  anywhere             anywhere            
+
+Chain KUBE-FIREWALL (2 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere             /* kubernetes firewall for dropping marked packets */ mark match 0x8000/0x8000
+
+Chain KUBE-KUBELET-CANARY (0 references)
+target     prot opt source               destination         
+
+Chain KUBE-PROXY-CANARY (0 references)
+target     prot opt source               destination         
+
+Chain KUBE-EXTERNAL-SERVICES (1 references)
+target     prot opt source               destination         
+REJECT     tcp  --  anywhere             anywhere             /* default/kplabs-nodeport: has no endpoints */ ADDRTYPE match dst-type LOCAL tcp dpt:31537 reject-with icmp-port-unreachable
+REJECT     tcp  --  anywhere             anywhere             /* default/nodeport-svc-2: has no endpoints */ ADDRTYPE match dst-type LOCAL tcp dpt:32214 reject-with icmp-port-unreachable
+
+Chain KUBE-SERVICES (3 references)
+target     prot opt source               destination         
+REJECT     tcp  --  anywhere             10.107.253.246       /* default/nodeport-svc: has no endpoints */ tcp dpt:http reject-with icmp-port-unreachable
+REJECT     tcp  --  anywhere             10.111.108.67        /* default/kplabs-cluster-ip: has no endpoints */ tcp dpt:webcache reject-with icmp-port-unreachable
+REJECT     tcp  --  anywhere             10.105.14.89         /* default/kplabs-nodeport: has no endpoints */ tcp dpt:http reject-with icmp-port-unreachable
+REJECT     tcp  --  anywhere             10.103.60.86         /* default/dep-svc: has no endpoints */ tcp dpt:http reject-with icmp-port-unreachable
+REJECT     tcp  --  anywhere             10.100.38.43         /* default/nodeport-svc-2: has no endpoints */ tcp dpt:http reject-with icmp-port-unreachable
+
+Chain KUBE-FORWARD (1 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere             ctstate INVALID
+ACCEPT     all  --  anywhere             anywhere             /* kubernetes forwarding rules */ mark match 0x4000/0x4000
+
+Chain DOCKER-ISOLATION-STAGE-2 (1 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere            
+RETURN     all  --  anywhere             anywhere            

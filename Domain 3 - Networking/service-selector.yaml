@@ -4,7 +4,7 @@ metadata:
    name: kplabs-service-selector
 spec:
    selector:
-     run: nginx
+     run: nginx00
    ports:
    - port: 80
      targetPort: 80

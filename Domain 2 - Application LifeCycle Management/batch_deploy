@@ -1,0 +1,8 @@
+# kubectl run --help --> example for KUBECTL RUN
+# create a Deployment
+kubectl run nginx-deployment --image=nginx
+# create a Deployment with Replica Set
+kubectl run nginx --image=nginx --replicas 3
+# output the Manifest File
+kubectl run nginx --image=nginx --replicas 3 --dry-run -o yaml
+kubectl run pi --schedule="0/5 * * * ?" --image=perl --restart=OnFailure -- perl -Mbignum=bpi -wle 'print bpi(2000)'

@@ -10,4 +10,4 @@ spec:
         image: busybox
         command: ["/bin/sh"]
         args: ["-c", "echo Hello World"]
-      restartPolicy: Never
+      restartPolicy: Never 

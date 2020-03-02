@@ -18,8 +18,3 @@ spec:
       - backend:
           serviceName: service2
           servicePort: 80
-  - http:
-      paths:
-      - backend:
-          serviceName: service3
-          servicePort: 80
